@@ -12,6 +12,8 @@ public class Game : ComponentSystem
     struct InitGameComponent : IComponentData
     {
     }
+
+    
     protected override void OnCreate()
     {
         RequireSingletonForUpdate<InitGameComponent>();
@@ -23,6 +25,11 @@ public class Game : ComponentSystem
 
     protected override void OnUpdate()
     {
+        if(!StartController.AllowStart)
+        {
+            return;
+        }
+
         // Destroy singleton to prevent system from running again
         EntityManager.DestroyEntity(GetSingletonEntity<InitGameComponent>());
         foreach (var world in World.AllWorlds)
@@ -39,7 +46,8 @@ public class Game : ComponentSystem
             else if (world.GetExistingSystem<ServerSimulationSystemGroup>() != null)
             {
                 // Server world automatically listen for connections from any host
-                NetworkEndPoint ep = NetworkEndPoint.AnyIpv4;
+                //NetworkEndPoint ep = NetworkEndPoint.AnyIpv4;
+                NetworkEndPoint ep = NetworkEndPoint.Parse(StartController.IP, StartController.PORT);
                 ep.Port = 7979;
                 network.Listen(ep);
             }
